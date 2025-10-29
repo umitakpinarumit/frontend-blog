@@ -75,7 +75,7 @@ export default function BlogEditor({ initialData = {}, onSave, onSaveDraft }) {
   // URL ile görsel ekleme
   const insertImageFromUrl = () => {
     if (!imageUrl) {
-      alert('Lütfen bir görsel URL\'si girin!');
+      console.log('Görsel URL\'si gerekli');
       return;
     }
 
@@ -101,13 +101,13 @@ export default function BlogEditor({ initialData = {}, onSave, onSaveDraft }) {
 
     // Dosya boyutu kontrolü (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('⚠️ Dosya boyutu 5MB\'dan küçük olmalıdır!');
+      console.error('Dosya boyutu 5MB\'dan küçük olmalıdır');
       return;
     }
 
     // Dosya tipi kontrolü
     if (!file.type.startsWith('image/')) {
-      alert('⚠️ Lütfen bir görsel dosyası seçin!');
+      console.error('Lütfen bir görsel dosyası seçin');
       return;
     }
 
@@ -129,7 +129,6 @@ export default function BlogEditor({ initialData = {}, onSave, onSaveDraft }) {
 
     reader.onerror = () => {
       console.error('❌ Görsel yükleme hatası');
-      alert('Görsel yüklenirken bir hata oluştu!');
     };
 
     reader.readAsDataURL(file);
@@ -152,12 +151,12 @@ export default function BlogEditor({ initialData = {}, onSave, onSaveDraft }) {
     
     // Validasyon
     if (!formData.title.trim()) {
-      alert('Lütfen blog başlığı girin!');
+      console.error('Blog başlığı gerekli');
       return;
     }
     
     if (!formData.content.trim()) {
-      alert('Lütfen blog içeriği girin!');
+      console.error('Blog içeriği gerekli');
       return;
     }
     
@@ -524,7 +523,10 @@ export default function BlogEditor({ initialData = {}, onSave, onSaveDraft }) {
                 src={imageUrl} 
                 alt="Önizleme"
                 className="max-w-full h-auto rounded border border-gray-300 dark:border-gray-600"
-                onError={() => alert('⚠️ Görsel yüklenemedi. URL\'yi kontrol edin.')}
+                onError={(e) => {
+                  console.error('Görsel yüklenemedi');
+                  e.target.style.display = 'none';
+                }}
               />
             </div>
           )}

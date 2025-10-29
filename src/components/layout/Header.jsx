@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
-import { Home, PenSquare, LayoutDashboard, Sun, Moon } from 'lucide-react';
+import { Home, PenSquare, LayoutDashboard, Sun, Moon, LogIn, UserPlus, LogOut, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '@/lib/redux/slices/authSlice';
 
 /**
  * Header Component
@@ -14,10 +16,16 @@ import { useState, useEffect } from 'react';
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   const [isDark, setIsDark] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Dark mode kontrolü
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     console.log('🔍 Dark Mode Debug - useEffect çalıştı');
     
     const theme = localStorage.getItem('theme');
@@ -39,6 +47,8 @@ export default function Header() {
 
   // Dark mode toggle
   const toggleTheme = () => {
+    if (typeof window === 'undefined') return;
+    
     console.log('🔄 Toggle butonuna tıklandı');
     console.log('📊 Önceki durum - isDark:', isDark);
     
@@ -58,11 +68,21 @@ export default function Header() {
     console.log('📦 LocalStorage:', localStorage.getItem('theme'));
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    setShowUserMenu(false);
+    router.push('/');
+  };
+
   const navLinks = [
     { href: '/', label: 'Ana Sayfa', icon: Home },
     { href: '/create-blog', label: 'Blog Yaz', icon: PenSquare },
-    { href: '/admin', label: 'Admin Panel', icon: LayoutDashboard },
   ];
+
+  // Admin linki sadece admin kullanıcılara göster
+  if (user?.role === 'admin') {
+    navLinks.push({ href: '/admin', label: 'Admin Panel', icon: LayoutDashboard });
+  }
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-40">
@@ -74,7 +94,7 @@ export default function Header() {
           </Link>
 
           {/* Navigation */}
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center gap-4">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
@@ -104,6 +124,57 @@ export default function Header() {
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
+
+            {/* Auth Buttons / User Menu */}
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <User className="w-5 h-5" />
+                  <span className="hidden md:inline font-medium">{user.name}</span>
+                </button>
+
+                {/* Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                    <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {user.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Çıkış Yap
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <LogIn className="w-5 h-5" />
+                  <span className="hidden md:inline">Giriş</span>
+                </Link>
+                <Link
+                  href="/register"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  <span className="hidden md:inline">Kayıt Ol</span>
+                </Link>
+              </div>
+            )}
           </nav>
         </div>
       </div>

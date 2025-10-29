@@ -35,9 +35,13 @@ export default function AdminBlogsPage() {
   const [showMenu, setShowMenu] = useState(null);
 
   useEffect(() => {
-    // Admin kontrolü
-    if (user && user.role !== 'admin') {
-      alert('Bu sayfaya erişim yetkiniz yok!');
+    // Giriş ve admin kontrolü
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (user.role !== 'admin') {
       router.push('/');
       return;
     }
@@ -68,10 +72,9 @@ export default function AdminBlogsPage() {
 
     try {
       await dispatch(deleteBlog(id)).unwrap();
-      alert('✅ Blog başarıyla silindi!');
+      console.log('✅ Blog silindi:', id);
     } catch (error) {
       console.error('Silme hatası:', error);
-      alert('Blog silinirken bir hata oluştu!');
     }
   };
 

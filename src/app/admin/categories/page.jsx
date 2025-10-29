@@ -40,9 +40,13 @@ export default function AdminCategoriesPage() {
   });
 
   useEffect(() => {
-    // Admin kontrolü
-    if (user && user.role !== 'admin') {
-      alert('Bu sayfaya erişim yetkiniz yok!');
+    // Giriş ve admin kontrolü
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (user.role !== 'admin') {
       router.push('/');
       return;
     }
@@ -114,7 +118,7 @@ export default function AdminCategoriesPage() {
 
     setIsModalOpen(false);
     setEditingItem(null);
-    alert('✅ Başarıyla kaydedildi!');
+    console.log('✅ Başarıyla kaydedildi');
   };
 
   // Sil
@@ -132,7 +136,7 @@ export default function AdminCategoriesPage() {
       setTags(tags.filter(t => t._id !== id));
     }
 
-    alert('✅ Başarıyla silindi!');
+    console.log('✅ Başarıyla silindi');
   };
 
   // Slug oluştur

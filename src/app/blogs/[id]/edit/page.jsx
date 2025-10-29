@@ -43,7 +43,6 @@ export default function EditBlogPage() {
       const isAdmin = user.role === 'admin';
       
       if (!isOwner && !isAdmin) {
-        alert('Bu blogu düzenleme yetkiniz yok!');
         router.push(`/blogs/${params.id}`);
       }
     }
@@ -60,12 +59,12 @@ export default function EditBlogPage() {
         data: blogData 
       })).unwrap();
       
-      alert('✅ Blog başarıyla güncellendi!');
       router.push(`/blogs/${params.id}`);
       
     } catch (error) {
       console.error('❌ Güncelleme hatası:', error);
-      alert('Blog güncellenirken bir hata oluştu!');
+      setSaveMessage('❌ Güncelleme başarısız');
+      setTimeout(() => setSaveMessage(''), 3000);
     } finally {
       setIsSaving(false);
       setSaveMessage('');
@@ -74,6 +73,8 @@ export default function EditBlogPage() {
 
   // Taslak Olarak Kaydet
   const handleSaveDraft = (blogData) => {
+    if (typeof window === 'undefined') return;
+    
     try {
       const draft = {
         ...blogData,
@@ -94,7 +95,8 @@ export default function EditBlogPage() {
       
     } catch (error) {
       console.error('❌ Taslak kaydetme hatası:', error);
-      alert('Taslak kaydedilemedi!');
+      setSaveMessage('❌ Taslak kaydedilemedi');
+      setTimeout(() => setSaveMessage(''), 3000);
     }
   };
 

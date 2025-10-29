@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { fetchBlogById, likeBlog, incrementViewCount } from '@/lib/redux/slices/blogSlice';
 import { motion } from 'framer-motion';
 import { Eye, Heart, Calendar, Clock, Share2, ArrowLeft } from 'lucide-react';
@@ -31,6 +31,7 @@ import {
 
 export default function BlogDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const dispatch = useDispatch();
   const { currentBlog, isLoading, error } = useSelector((state) => state.blog);
   const { user } = useSelector((state) => state.auth);
@@ -91,13 +92,19 @@ export default function BlogDetailPage() {
   // Beğeni işlemi
   const handleLike = async () => {
     if (!user) {
-      alert('Beğenmek için giriş yapmalısınız.');
+      // Kullanıcı giriş yapmamışsa direkt login sayfasına yönlendir
+      router.push('/login');
       return;
     }
     
     try {
-      await dispatch(likeBlog(params.id)).unwrap();
-      setLiked(!liked);
+      const result = await dispatch(likeBlog(params.id)).unwrap();
+      // Backend'den dönen güncel beğeni sayısını kullan
+      if (result && result.likesCount !== undefined) {
+        setLiked(true);
+        // Blogu yeniden yükle - güncel beğeni sayısını göster
+        dispatch(fetchBlogById(params.id));
+      }
     } catch (error) {
       console.error('Beğeni işlemi başarısız:', error);
     }

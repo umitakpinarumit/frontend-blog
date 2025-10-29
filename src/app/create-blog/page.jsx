@@ -30,16 +30,17 @@ export default function CreateBlogPage() {
 
   // Sayfa yüklendiğinde taslağı kontrol et
   useEffect(() => {
-    const draft = localStorage.getItem('blogDraft');
-    if (draft) {
-      console.log('📝 Taslak bulundu! LocalStorage\'dan yüklenebilir.');
+    if (typeof window !== 'undefined') {
+      const draft = localStorage.getItem('blogDraft');
+      if (draft) {
+        console.log('📝 Taslak bulundu! LocalStorage\'dan yüklenebilir.');
+      }
     }
   }, []);
 
-  // Giriş kontrolü
+  // Giriş kontrolü - kullanıcı yoksa login sayfasına yönlendir
   useEffect(() => {
     if (!user) {
-      alert('Blog oluşturmak için giriş yapmalısınız!');
       router.push('/login');
     }
   }, [user, router]);
@@ -47,7 +48,6 @@ export default function CreateBlogPage() {
   // Yayınla (Publish)
   const handleSave = async (blogData) => {
     if (!user) {
-      alert('Blog oluşturmak için giriş yapmalısınız!');
       router.push('/login');
       return;
     }
@@ -62,9 +62,9 @@ export default function CreateBlogPage() {
       const result = await dispatch(createBlog(blogData)).unwrap();
       
       // Taslağı temizle
-      localStorage.removeItem('blogDraft');
-      
-      alert('✅ Blog başarıyla yayınlandı!');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('blogDraft');
+      }
       
       // Blog detay sayfasına yönlendir
       if (result._id) {
@@ -75,8 +75,8 @@ export default function CreateBlogPage() {
       
     } catch (error) {
       console.error('❌ Yayınlama hatası:', error);
-      const errorMessage = error.message || error || 'Blog yayınlanırken bir hata oluştu!';
-      alert(`Hata: ${errorMessage}`);
+      setSaveMessage('❌ Yayınlama başarısız oldu');
+      setTimeout(() => setSaveMessage(''), 3000);
     } finally {
       setIsSaving(false);
       setSaveMessage('');
@@ -85,6 +85,8 @@ export default function CreateBlogPage() {
 
   // Taslak Olarak Kaydet
   const handleSaveDraft = (blogData) => {
+    if (typeof window === 'undefined') return;
+    
     try {
       const draft = {
         ...blogData,
@@ -105,12 +107,18 @@ export default function CreateBlogPage() {
       
     } catch (error) {
       console.error('❌ Taslak kaydetme hatası:', error);
-      alert('Taslak kaydedilemedi!');
+      setSaveMessage('❌ Taslak kaydedilemedi');
+      setTimeout(() => setSaveMessage(''), 3000);
     }
   };
 
   // Taslağı Yükle
   const loadDraft = () => {
+    // SSR kontrolü - localStorage sadece tarayıcıda mevcut
+    if (typeof window === 'undefined') {
+      return {};
+    }
+    
     try {
       const draft = localStorage.getItem('blogDraft');
       if (draft) {

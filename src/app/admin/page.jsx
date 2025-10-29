@@ -21,15 +21,39 @@ export default function AdminDashboard() {
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // Admin kontrolü
-    if (user && user.role !== 'admin') {
-      alert('Bu sayfaya erişim yetkiniz yok!');
+    // Giriş ve admin kontrolü
+    if (!user) {
+      // Giriş yapmamışsa login sayfasına yönlendir
+      router.push('/login');
+      return;
+    }
+    
+    if (user.role !== 'admin') {
+      // Admin değilse ana sayfaya yönlendir
       router.push('/');
       return;
     }
 
     dispatch(fetchBlogs());
   }, [dispatch, user, router]);
+
+  // Giriş kontrolü - kullanıcı yoksa loading göster
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Admin kontrolü - admin değilse loading göster
+  if (user.role !== 'admin') {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   // İstatistikleri hesapla
   const totalBlogs = blogs?.length || 0;

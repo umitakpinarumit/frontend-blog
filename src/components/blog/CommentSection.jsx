@@ -41,7 +41,7 @@ export default function CommentSection({
     if (!newComment.trim()) return;
     
     if (!currentUserId) {
-      alert('Yorum yapmak için giriş yapmalısınız.');
+      // Giriş yapmadan yorum yapılamaz (sessizce çık)
       return;
     }
 
@@ -59,7 +59,7 @@ export default function CommentSection({
   // Cevap verme
   const handleReply = async (parentCommentId, content) => {
     if (!currentUserId) {
-      alert('Cevap vermek için giriş yapmalısınız.');
+      // Giriş yapmadan cevap yazılamaz (sessizce çık)
       return;
     }
 

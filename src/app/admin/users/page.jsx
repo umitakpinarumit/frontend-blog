@@ -35,9 +35,13 @@ export default function AdminUsersPage() {
   const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
-    // Admin kontrolü
-    if (user && user.role !== 'admin') {
-      alert('Bu sayfaya erişim yetkiniz yok!');
+    // Giriş ve admin kontrolü
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    if (user.role !== 'admin') {
       router.push('/');
       return;
     }
@@ -88,10 +92,9 @@ export default function AdminUsersPage() {
       // TODO: API'ye silme isteği
       console.log('Kullanıcı siliniyor:', userId);
       setUsers(users.filter(u => u._id !== userId));
-      alert('✅ Kullanıcı başarıyla silindi!');
+      console.log('✅ Kullanıcı silindi');
     } catch (error) {
       console.error('Silme hatası:', error);
-      alert('Kullanıcı silinirken bir hata oluştu!');
     }
   };
 
@@ -103,10 +106,9 @@ export default function AdminUsersPage() {
       setUsers(users.map(u => 
         u._id === userId ? { ...u, role: newRole } : u
       ));
-      alert('✅ Kullanıcı rolü güncellendi!');
+      console.log('✅ Kullanıcı rolü güncellendi');
     } catch (error) {
       console.error('Rol güncelleme hatası:', error);
-      alert('Rol güncellenirken bir hata oluştu!');
     }
   };
 
@@ -333,7 +335,7 @@ export default function AdminUsersPage() {
               </Button>
               <Button onClick={() => {
                 // TODO: Kaydetme işlemi
-                alert('Kaydedildi! (TODO: API entegrasyonu)');
+                console.log('Kullanıcı kaydedildi (API entegrasyonu bekleniyor)');
                 setIsModalOpen(false);
                 setEditingUser(null);
               }}>
